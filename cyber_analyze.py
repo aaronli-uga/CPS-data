@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-13 17:23:17
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-13 20:06:50
+LastEditTime: 2023-06-14 18:13:01
 Description: 
 '''
 import pandas as pd
@@ -26,6 +26,11 @@ df = pd.read_csv("dataset/cyber_data/cyber_final.csv")
 #%%
 # Drop the unrelated protocols
 drop_protocol = ['BJNP', 'BROWSER', 'DB-LSP-DISC']
+# drop_protocol = ['ATH', 'BJNP','BROWSER','DB-LSP-DISC','DHCP','DHCPv6','ENIP'
+#                 ,'FDP','GVCP','HTTP/XML','ICMP','ICMPv6','IGMPv3','LDAP','LLC'
+#                 ,'LLDP','LLMNR','MANOLITO','MDNS','NBNS','NBSS','NTP','PTPv2',
+#                 'SRVLOC','SSDP','SSH','STP','TCP','TLSv1','TLSv1.2','TLSv1.3','TZSP'
+#                 ,'UDP', 'SNMP', 'ARP']
 df = df[df.Protocol.isin(drop_protocol) == False]
 
 class_encoder = LabelEncoder()
