@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-13 20:08:41
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-14 16:21:38
+LastEditTime: 2023-06-15 15:30:01
 Description: 
 '''
 import pandas as pd
@@ -181,7 +181,7 @@ plt.show()
 #%% CPU related. usage_system and usage_user of cpu-total
 # df = pd.read_csv("dataset/systematic_data/cpu/cpu_pi1testbed_final.csv")
 
-
+# print(df.columns)
 # attack_df = df.loc[(df['class_1'] == 'attack') & (df["cpu"] == 'cpu-total')]
 # normal_df = df.loc[(df['class_1'] == 'normal') & (df["cpu"] == 'cpu-total')]
 

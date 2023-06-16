@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-14 21:16:05
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-14 21:58:30
+LastEditTime: 2023-06-15 18:59:43
 Description: 
 '''
 import pandas as pd
@@ -20,13 +20,15 @@ from sklearn.manifold import TSNE
 import xgboost as xgb
 
 
-# Features: only consider sensor1 and sensor2. sensor1_AC_mag, sensor1_AC_freq
+# Features: only consider sensor1 and sensor2. 
+# sensor1_AC_mag, sensor1_AC_freq, sensor1_AC_thd, sensor1_DC_freq, sensor1_DC_mag, sensor1_DC_thd,
+# sensor2_AC_mag, sensor2_AC_freq, sensor2_AC_thd, sensor2_DC_freq, sensor2_DC_mag, sensor2_DC_thd,
 
 df = pd.read_csv("dataset/physical_data/physical_final.csv")
 
 print(df.columns)
 
-feature = "sensor1_AC_freq"
+feature = "sensor3_AC_freq"
 delta = False
 # delta = True
 
@@ -51,7 +53,7 @@ else:
     plt.plot(normal_df["_time"], normal_df[feature], color='green', label="normal")
     plt.plot(attack_df["_time"], attack_df[feature], color='red', label='attack')
 
-plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 1600))
+plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 2000))
 plt.yticks(fontsize=40)
 if delta:
     plt.ylabel(f"{feature}_delta", size = 40)

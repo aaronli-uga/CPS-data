@@ -46,13 +46,14 @@ else:
     plt.plot(normal_df["_time"], normal_df[feature], color='green', label="normal")
     plt.plot(attack_df["_time"], attack_df[feature], color='red', label='attack')
 
-plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 200))
+plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 50), fontsize=20)
 plt.yticks(fontsize=40)
 if delta:
     plt.ylabel(f"{feature}_delta", size = 40)
 else:
-    plt.ylabel(f"{feature}", size = 40)
-plt.xlabel("Time", size = 20)
+    plt.ylabel(f"{feature} (bytes)", size = 40)
+plt.xlabel("Time", size = 40)
+plt.title(f"{protocol}", size = 40)
 # Setting the number of ticks
 plt.legend(fontsize=40)
 plt.show()  

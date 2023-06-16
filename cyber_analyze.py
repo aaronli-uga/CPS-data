@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-13 17:23:17
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-14 18:13:01
+LastEditTime: 2023-06-15 22:18:48
 Description: 
 '''
 import pandas as pd
@@ -17,6 +17,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.manifold import TSNE
+# from sklearn.feature_extraction import RFECV
 import xgboost as xgb
 
 
@@ -30,7 +31,7 @@ drop_protocol = ['BJNP', 'BROWSER', 'DB-LSP-DISC']
 #                 ,'FDP','GVCP','HTTP/XML','ICMP','ICMPv6','IGMPv3','LDAP','LLC'
 #                 ,'LLDP','LLMNR','MANOLITO','MDNS','NBNS','NBSS','NTP','PTPv2',
 #                 'SRVLOC','SSDP','SSH','STP','TCP','TLSv1','TLSv1.2','TLSv1.3','TZSP'
-#                 ,'UDP', 'SNMP', 'ARP']
+#                 ,'UDP', 'SNMP', 'HTTP']
 df = df[df.Protocol.isin(drop_protocol) == False]
 
 class_encoder = LabelEncoder()
@@ -38,7 +39,8 @@ scaler = MinMaxScaler()
 df['class_1'] = class_encoder.fit_transform(df['class_1'])
 df['class_2'] = class_encoder.fit_transform(df['class_2'])
 df_protocol = pd.get_dummies(df['Protocol'])
-df_clean = df[['Count', 'Traffic', 'class_1', 'class_2']]
+# df_clean = df[['Count', 'Traffic', 'class_1', 'class_2']]
+df_clean = df[['class_1', 'class_2']]
 df_clean = pd.concat([df_protocol, df_clean], axis=1)
 
 binary_class1 = df['class_1'].astype('category')
@@ -47,7 +49,10 @@ label_color = ['green' if i==1 else 'Red' for i in binary_class1]
 # dataframe for PCA : PCA can not have 'categorical' features
 df_tmp = df_clean.drop(['class_1', 'class_2'], axis=1)
 # Mean normalization
-normalized_df = (df_tmp - df_tmp.mean()) / df_tmp.std()
+# normalized_df = (df_tmp - df_tmp.mean()) / df_tmp.std()
+
+# all the features
+feature_names = df_tmp.columns.to_list() 
 
 # PCA
 # pca = PCA(n_components=2)
@@ -61,7 +66,7 @@ normalized_df = (df_tmp - df_tmp.mean()) / df_tmp.std()
 #         title="red: attack, green: normal" )
 # plt.show()
 # %%
-features = normalized_df.to_numpy()
+features = df_tmp.to_numpy()
 targets =  df_clean['class_1'].to_numpy()
 
 # split the training and test data
@@ -80,8 +85,8 @@ train_features, test_features, train_targets, test_targets = train_test_split(
 # use LogisticRegression
 # classifier = KNeighborsClassifier()
 # classifier = DecisionTreeClassifier()
-# classifier = RandomForestClassifier()
-classifier =xgb.XGBClassifier()
+classifier = RandomForestClassifier()
+# classifier =xgb.XGBClassifier()
 # training using 'training data'
 classifier.fit(train_features, train_targets) # fit the model for training data
 
@@ -94,6 +99,18 @@ print("Accuracy for training data (self accuracy):", self_accuracy)
 prediction_test_targets = classifier.predict(test_features)
 test_accuracy = accuracy_score(test_targets, prediction_test_targets)
 print("Accuracy for test data:", test_accuracy)
+
+# feature importances
+f_i = list(zip(feature_names, classifier.feature_importances_))
+f_i.sort(key = lambda x : x[1])
+# plt.barh([x[0] for x in f_i],[x[1] for x in f_i])
+plt.figure(figsize=(12, 10))
+plt.barh([x[0] for x in f_i[-18:]],[x[1] for x in f_i[-18:]])
+plt.xticks(fontsize=40)
+plt.yticks(fontsize=40)
+plt.xlabel("Importance Score", size = 40)
+plt.show()
+
 # %%
 # n_components = 2
 # tsne = TSNE(n_components)
