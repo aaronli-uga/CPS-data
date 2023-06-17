@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-13 20:08:41
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-15 15:30:01
+LastEditTime: 2023-06-16 20:33:16
 Description: 
 '''
 import pandas as pd
@@ -10,7 +10,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import LabelEncoder, MinMaxScaler, StandardScaler
 from sklearn.decomposition import PCA
-from sklearn.metrics import accuracy_score
+from sklearn.metrics import accuracy_score, f1_score
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.neighbors import KNeighborsClassifier

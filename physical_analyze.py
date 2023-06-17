@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-04-04 19:53:35
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-13 19:48:23
+LastEditTime: 2023-06-16 22:28:21
 Description: 
 '''
 #%%
@@ -30,7 +30,7 @@ class_encoder = LabelEncoder()
 scaler = MinMaxScaler()
 df['class_1'] = class_encoder.fit_transform(df['class_1'])
 df['class_2'] = class_encoder.fit_transform(df['class_2'])
-df_clean = df[['sensor1_AC_angle', 'sensor1_AC_freq', 'sensor1_AC_mag', 'sensor1_AC_thd', 'sensor1_DC_angle', 'sensor1_DC_freq', 'sensor1_DC_mag', 'sensor1_DC_thd', 'sensor2_AC_angle', 'sensor2_AC_freq', 'sensor2_AC_mag', 'sensor2_AC_thd', 'sensor2_DC_angle', 'sensor2_DC_freq', 'sensor2_DC_mag', 'sensor2_DC_thd', 'class_1', 'class_2']]
+df_clean = df[['sensor1_AC_freq', 'sensor1_AC_mag', 'sensor1_AC_thd', 'sensor1_DC_freq', 'sensor1_DC_mag', 'sensor1_DC_thd', 'sensor2_AC_freq', 'sensor2_AC_mag', 'sensor2_AC_thd', 'sensor2_DC_freq', 'sensor2_DC_mag', 'sensor2_DC_thd', 'class_1', 'class_2']]
 
 binary_class1 = df['class_2'].astype('category')
 label_color = ['#2ca02c' if i==1 else '#d62728' for i in binary_class1]
@@ -69,10 +69,10 @@ train_features, test_features, train_targets, test_targets = train_test_split(
     )
 
 # use LogisticRegression
-# classifier = KNeighborsClassifier()
+classifier = KNeighborsClassifier()
 # classifier = DecisionTreeClassifier()
 # classifier = RandomForestClassifier()
-classifier =xgb.XGBClassifier()
+# classifier =xgb.XGBClassifier()
 
 # training using 'training data'
 classifier.fit(train_features, train_targets) # fit the model for training data

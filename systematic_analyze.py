@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-13 17:23:17
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-16 21:36:17
+LastEditTime: 2023-06-16 21:35:53
 Description: 
 '''
 import pandas as pd
@@ -20,31 +20,42 @@ from sklearn.manifold import TSNE
 # from sklearn.feature_extraction import RFECV
 import xgboost as xgb
 
-
-df = pd.read_csv("dataset/cyber_data/cyber_final.csv")
-
-
-#%%
-# Drop the unrelated protocols
-drop_protocol = ['BJNP', 'BROWSER', 'DB-LSP-DISC']
-# drop_protocol = ['ATH', 'BJNP','BROWSER','DB-LSP-DISC','DHCP','DHCPv6','ENIP'
-#                 ,'FDP','GVCP','HTTP/XML','ICMP','ICMPv6','IGMPv3','LDAP','LLC'
-#                 ,'LLDP','LLMNR','MANOLITO','MDNS','NBNS','NBSS','NTP','PTPv2',
-#                 'SRVLOC','SSDP','SSH','STP','TCP','TLSv1','TLSv1.2','TLSv1.3','TZSP'
-#                 ,'UDP', 'SNMP', 'HTTP']
-df = df[df.Protocol.isin(drop_protocol) == False]
-
-class_encoder = LabelEncoder()
-scaler = MinMaxScaler()
-df['class_1'] = class_encoder.fit_transform(df['class_1'])
-df['class_2'] = class_encoder.fit_transform(df['class_2'])
-df_protocol = pd.get_dummies(df['Protocol'])
-# df_clean = df[['Count', 'Traffic', 'class_1', 'class_2']]
-df_clean = df[['class_1', 'class_2']]
-df_clean = pd.concat([df_protocol, df_clean], axis=1)
+# test on pi1
+df = pd.read_csv("dataset/systematic_data/cpu/cpu_pi1testbed_final.csv")
+df = df.loc[df["cpu"] == "cpu-total"]
+df = df.reset_index()
+df_labels = df[['class_1', 'class_2']]
 
 binary_class1 = df['class_1'].astype('category')
 label_color = ['green' if i==1 else 'Red' for i in binary_class1]
+
+df_features_cpu = df.drop(columns=['index', 'Unnamed: 0', '_time', 'cpu', 'host', 'class_1', 'class_2'])
+
+df = pd.read_csv("dataset/systematic_data/diskio/diskio_pi1testbed_final.csv")
+df_features_diskio = df.drop(columns=['Unnamed: 0', '_time', 'name', 'host', 'class_1', 'class_2'])
+
+df = pd.read_csv("dataset/systematic_data/memory/mem_pi1testbed_final.csv")
+df_features_mem = df.drop(columns=['Unnamed: 0', '_time', 'host', 'class_1', 'class_2'])
+
+df = pd.read_csv("dataset/systematic_data/network/network_pi1testbed_final.csv")
+df_features_network = df.drop(columns=['Unnamed: 0', '_time', 'interface', 'host', 'class_1', 'class_2'])
+
+df = pd.read_csv("dataset/systematic_data/processes/processes_pi1testbed_final.csv")
+df_features_processes = df.drop(columns=['Unnamed: 0', '_time', 'host', 'class_1', 'class_2'])
+
+df = pd.read_csv("dataset/systematic_data/system_info/system_pi1testbed_final.csv")
+df_features_system = df.drop(columns=['Unnamed: 0', '_time', 'host', 'uptime', 'uptime_format', 'class_1', 'class_2'])
+
+
+#%%
+class_encoder = LabelEncoder()
+scaler = MinMaxScaler()
+df_labels['class_1'] = class_encoder.fit_transform(df_labels['class_1'])
+df_labels['class_2'] = class_encoder.fit_transform(df_labels['class_2'])
+df_clean = pd.concat([df_features_cpu, df_features_diskio, df_features_mem, df_features_network, df_features_processes, df_features_system, df_labels], axis=1)
+df_clean = df_clean[["write_bytes", "write_time", "merged_writes", "writes", "usage_system", "slab", "used", "bytes_recv", "bytes_sent", "total_threads", "io_time", "load15", "load1", "class_1", "class_2"]]
+
+
 
 # dataframe for PCA : PCA can not have 'categorical' features
 df_tmp = df_clean.drop(['class_1', 'class_2'], axis=1)
@@ -67,7 +78,7 @@ feature_names = df_tmp.columns.to_list()
 # plt.show()
 # %%
 features = df_tmp.to_numpy()
-targets =  df_clean['class_2'].to_numpy()
+targets =  df_clean['class_1'].to_numpy()
 
 # split the training and test data
 train_features, test_features, train_targets, test_targets = train_test_split(
@@ -83,10 +94,10 @@ train_features, test_features, train_targets, test_targets = train_test_split(
     )
 
 # use LogisticRegression
-classifier = KNeighborsClassifier()
+# classifier = KNeighborsClassifier()
 # classifier = DecisionTreeClassifier()
 # classifier = RandomForestClassifier()
-# classifier =xgb.XGBClassifier()
+classifier =xgb.XGBClassifier()
 # training using 'training data'
 classifier.fit(train_features, train_targets) # fit the model for training data
 
@@ -94,25 +105,25 @@ classifier.fit(train_features, train_targets) # fit the model for training data
 prediction_training_targets = classifier.predict(train_features)
 self_accuracy = accuracy_score(train_targets, prediction_training_targets)
 print("Accuracy for training data (self accuracy):", self_accuracy)
-self_f1 = f1_score(train_targets, prediction_training_targets, average='weighted')
+self_f1 = f1_score(train_targets, prediction_training_targets, average='micro')
 print("F1 score for training data (self f1score):", self_f1)
 
 # predict the 'target' for 'test data'
 prediction_test_targets = classifier.predict(test_features)
 test_accuracy = accuracy_score(test_targets, prediction_test_targets)
 print("Accuracy for test data:", test_accuracy)
-test_f1 = f1_score(test_targets, prediction_test_targets, average='weighted')
+test_f1 = f1_score(test_targets, prediction_test_targets, average='micro')
 print("F1 score for test data:", test_f1)
 
-# # feature importances
+# feature importances
 # f_i = list(zip(feature_names, classifier.feature_importances_))
 # f_i.sort(key = lambda x : x[1])
 # # plt.barh([x[0] for x in f_i],[x[1] for x in f_i])
 # plt.figure(figsize=(12, 10))
-# plt.barh([x[0] for x in f_i[-18:]],[x[1] for x in f_i[-18:]])
-# plt.xticks(fontsize=40)
-# plt.yticks(fontsize=40)
-# plt.xlabel("Importance Score", size = 40)
+# plt.barh([x[0] for x in f_i[-20:]],[x[1] for x in f_i[-20:]])
+# plt.xticks(fontsize=30)
+# plt.yticks(fontsize=20)
+# plt.xlabel("Importance Score", size = 30)
 # plt.show()
 
 # %%
