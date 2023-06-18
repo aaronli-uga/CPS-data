@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-04-04 19:53:35
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-17 22:22:27
+LastEditTime: 2023-06-17 23:29:32
 Description: 
 '''
 #%%
@@ -110,7 +110,7 @@ train_features, test_features, train_targets, test_targets = train_test_split(
 # plt.show()
 
 
-# %% ANN models
+# %% ANN models detection
 
 
 save_model_path = "saved_models/"
@@ -119,7 +119,7 @@ validset = RegularLoader(test_features, test_targets)
 
 # Hyper parameters
 batch_size = 512
-learning_rate = 0.01
+learning_rate = 0.005
 num_epochs = 500
 history = dict(val_loss=[], val_acc=[], val_f1=[], val_f1_all=[], train_loss=[], train_acc=[], train_f1=[], train_f1_all=[])
 
@@ -128,7 +128,7 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 trainloader = DataLoader(trainset, shuffle=True, batch_size=batch_size)
 validloader = DataLoader(validset, shuffle=True, batch_size=batch_size) # get all the samples at once
-model = ANN(n_input=features.shape[1], n_classes=1)
+model = ANN(n_input=train_features.shape[1], n_classes=1)
 model.to(device)
 optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
@@ -144,3 +144,36 @@ model_train_detection(
 
 torch.save(model.state_dict(), save_model_path + f"detection_epochs{num_epochs}_lr_{learning_rate}_bs_{batch_size}_best_model.pth")
 np.save(save_model_path + f"detection_epochs{num_epochs}_lr_{learning_rate}_bs_{batch_size}_history.npy", history)
+
+#%% ANN models diagnosis
+# save_model_path = "saved_models/"
+# trainset = RegularLoader(train_features, train_targets)
+# validset = RegularLoader(test_features, test_targets)
+
+# # Hyper parameters
+# batch_size = 512
+# learning_rate = 0.0002
+# num_epochs = 2
+# history = dict(val_loss=[], val_acc=[], val_f1=[], val_f1_all=[], train_loss=[], train_acc=[], train_f1=[], train_f1_all=[])
+
+# device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# # device = "cpu"
+
+# trainloader = DataLoader(trainset, shuffle=True, batch_size=batch_size)
+# validloader = DataLoader(validset, shuffle=True, batch_size=batch_size) # get all the samples at once
+# model = ANN(n_input=features.shape[1], n_classes=4)
+# model.to(device)
+# optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+# model_train_diagnosis(
+#     model=model, 
+#     train_loader=trainloader, 
+#     val_loader=validloader,
+#     num_epochs=num_epochs,
+#     optimizer=optimizer,
+#     device=device,
+#     history=history
+# )
+
+# torch.save(model.state_dict(), save_model_path + f"detection_epochs{num_epochs}_lr_{learning_rate}_bs_{batch_size}_best_model.pth")
+# np.save(save_model_path + f"detection_epochs{num_epochs}_lr_{learning_rate}_bs_{batch_size}_history.npy", history)

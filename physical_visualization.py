@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-14 21:16:05
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-15 18:59:43
+LastEditTime: 2023-06-18 12:06:38
 Description: 
 '''
 import pandas as pd
@@ -28,7 +28,7 @@ df = pd.read_csv("dataset/physical_data/physical_final.csv")
 
 print(df.columns)
 
-feature = "sensor3_AC_freq"
+feature = "sensor2_AC_mag"
 delta = False
 # delta = True
 
@@ -53,13 +53,15 @@ else:
     plt.plot(normal_df["_time"], normal_df[feature], color='green', label="normal")
     plt.plot(attack_df["_time"], attack_df[feature], color='red', label='attack')
 
-plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 2000))
-plt.yticks(fontsize=40)
+# plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 2000))
+plt.xticks([])
+plt.yticks(fontsize=60)
 if delta:
-    plt.ylabel(f"{feature}_delta", size = 40)
+    plt.ylabel(f"{feature}_delta", size = 60)
 else:
-    plt.ylabel(f"{feature}", size = 40)
-plt.xlabel("Time", size = 20)
+    # plt.ylabel(f"{feature}", size = 60)
+    plt.ylabel("THD", size = 60)
+plt.xlabel("Time", size = 60)
 # Setting the number of ticks
-plt.legend(fontsize=40)
+plt.legend(fontsize=60)
 plt.show()  

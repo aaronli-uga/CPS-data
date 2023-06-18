@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-06-13 20:08:41
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-16 20:33:16
+LastEditTime: 2023-06-18 11:59:41
 Description: 
 '''
 import pandas as pd
@@ -21,43 +21,43 @@ from sklearn.manifold import TSNE
 
 
 #%% system info. Features: load1, load15, load5
-df = pd.read_csv("dataset/systematic_data/system_info/system_pi1testbed_final.csv")
-print(df.columns)
-feature = "uptime_format"
-delta = False
-# delta = True
+# df = pd.read_csv("dataset/systematic_data/system_info/system_pi1testbed_final.csv")
+# print(df.columns)
+# feature = "uptime_format"
+# delta = False
+# # delta = True
 
 
-attack_df = df.loc[df['class_1'] == 'attack']
-normal_df = df.loc[df['class_1'] == 'normal']
+# attack_df = df.loc[df['class_1'] == 'attack']
+# normal_df = df.loc[df['class_1'] == 'normal']
 
 
-# delta process make it better
-if delta:
-    normal_df_feature = np.diff(normal_df[feature].to_numpy())
-    normal_df_feature = np.append(normal_df_feature, normal_df_feature[-1])
-    attack_df_feature = np.diff(attack_df[feature].to_numpy())
-    attack_df_feature = np.append(attack_df_feature, attack_df_feature[-1])
+# # delta process make it better
+# if delta:
+#     normal_df_feature = np.diff(normal_df[feature].to_numpy())
+#     normal_df_feature = np.append(normal_df_feature, normal_df_feature[-1])
+#     attack_df_feature = np.diff(attack_df[feature].to_numpy())
+#     attack_df_feature = np.append(attack_df_feature, attack_df_feature[-1])
 
 
-plt.figure(figsize=(12, 10))
-if delta:
-    plt.plot(normal_df["_time"], normal_df_feature, color='green', label="normal")
-    plt.plot(attack_df["_time"], attack_df_feature, color='red', label='attack')
-else:
-    plt.plot(normal_df["_time"], normal_df[feature], color='green', label="normal")
-    plt.plot(attack_df["_time"], attack_df[feature], color='red', label='attack')
+# plt.figure(figsize=(12, 10))
+# if delta:
+#     plt.plot(normal_df["_time"], normal_df_feature, color='green', label="normal")
+#     plt.plot(attack_df["_time"], attack_df_feature, color='red', label='attack')
+# else:
+#     plt.plot(normal_df["_time"], normal_df[feature], color='green', label="normal")
+#     plt.plot(attack_df["_time"], attack_df[feature], color='red', label='attack')
 
-plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 200))
-plt.yticks(fontsize=40)
-if delta:
-    plt.ylabel(f"{feature}_delta", size = 40)
-else:
-    plt.ylabel(f"{feature}", size = 40)
-plt.xlabel("Time", size = 20)
-# Setting the number of ticks
-plt.legend(fontsize=40)
-plt.show()  
+# plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 200))
+# plt.yticks(fontsize=40)
+# if delta:
+#     plt.ylabel(f"{feature}_delta", size = 40)
+# else:
+#     plt.ylabel(f"{feature}", size = 40)
+# plt.xlabel("Time", size = 20)
+# # Setting the number of ticks
+# plt.legend(fontsize=40)
+# plt.show()  
 
 #%% processes related. Features: running, sleeping, total, total_threads, 
 # df = pd.read_csv("dataset/systematic_data/processes/processes_pi1testbed_final.csv")
@@ -179,19 +179,48 @@ plt.show()
 
 
 #%% CPU related. usage_system and usage_user of cpu-total
-# df = pd.read_csv("dataset/systematic_data/cpu/cpu_pi1testbed_final.csv")
+df = pd.read_csv("dataset/systematic_data/cpu/cpu_pi1testbed_final.csv")
+df2 = pd.read_csv("dataset/systematic_data/cpu/cpu_pi2testbed_final.csv")
+df3 = pd.read_csv("dataset/systematic_data/cpu/cpu_pi3testbed_final.csv")
+df4 = pd.read_csv("dataset/systematic_data/cpu/cpu_pi4testbed_final.csv")
 
 # print(df.columns)
-# attack_df = df.loc[(df['class_1'] == 'attack') & (df["cpu"] == 'cpu-total')]
-# normal_df = df.loc[(df['class_1'] == 'normal') & (df["cpu"] == 'cpu-total')]
+attack_df = df.loc[(df['class_1'] == 'attack') & (df["cpu"] == 'cpu-total')]
+normal_df = df.loc[(df['class_1'] == 'normal') & (df["cpu"] == 'cpu-total')]
 
-# # attack_df = df.loc[(df['class_1'] == 'attack') & (df["cpu"] == 'cpu0')]
-# # normal_df = df.loc[(df['class_1'] == 'normal') & (df["cpu"] == 'cpu0')]
+attack_df2 = df2.loc[(df2['class_1'] == 'attack') & (df2["cpu"] == 'cpu-total')]
+normal_df2 = df2.loc[(df2['class_1'] == 'normal') & (df2["cpu"] == 'cpu-total')]
+
+attack_df3 = df3.loc[(df3['class_1'] == 'attack') & (df3["cpu"] == 'cpu-total')]
+normal_df3 = df3.loc[(df3['class_1'] == 'normal') & (df3["cpu"] == 'cpu-total')]
+
+attack_df4 = df4.loc[(df4['class_1'] == 'attack') & (df4["cpu"] == 'cpu-total')]
+normal_df4 = df4.loc[(df4['class_1'] == 'normal') & (df4["cpu"] == 'cpu-total')]
+
+# attack_df = df.loc[(df['class_1'] == 'attack') & (df["cpu"] == 'cpu0')]
+# normal_df = df.loc[(df['class_1'] == 'normal') & (df["cpu"] == 'cpu0')]
+
+plt.figure(figsize=(12, 10))
+plt.plot(normal_df["_time"], normal_df["usage_system"], color='green', label="normal")
+plt.plot(attack_df["_time"], attack_df["usage_system"], color='red', label='attack')
+plt.plot(normal_df2["_time"], normal_df2["usage_system"], color='blue', label="normal_pi2")
+plt.plot(attack_df2["_time"], attack_df2["usage_system"], color='grey', label='attack_pi2')
+plt.plot(normal_df3["_time"], normal_df3["usage_system"], color='black', label="normal_pi3")
+plt.plot(attack_df3["_time"], attack_df3["usage_system"], color='yellow', label='attack_pi3')
+plt.plot(normal_df4["_time"], normal_df4["usage_system"], color='orange', label="normal_pi4")
+plt.plot(attack_df4["_time"], attack_df4["usage_system"], color='purple', label='attack_pi4')
+plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df["usage_system"]), 150))
+plt.yticks(fontsize=40)
+plt.ylabel("CPU total system usage %", size = 40)
+plt.xlabel("Time", size = 20)
+# Setting the number of ticks
+plt.legend(fontsize=40)
+plt.show()  
 
 # plt.figure(figsize=(12, 10))
-# plt.plot(normal_df["_time"], normal_df["usage_system"], color='green', label="normal")
-# plt.plot(attack_df["_time"], attack_df["usage_system"], color='red', label='attack')
-# plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df["usage_system"]), 150))
+# plt.plot(normal_df2["_time"], normal_df2["usage_system"], color='green', label="normal")
+# plt.plot(attack_df2["_time"], attack_df2["usage_system"], color='red', label='attack')
+# plt.xticks(np.arange(0, len(normal_df2["_time"]) + len(attack_df2["usage_system"]), 150))
 # plt.yticks(fontsize=40)
 # plt.ylabel("CPU total system usage %", size = 40)
 # plt.xlabel("Time", size = 20)

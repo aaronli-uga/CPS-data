@@ -1,3 +1,10 @@
+'''
+Author: Qi7
+Date: 2023-06-14 16:29:35
+LastEditors: aaronli-uga ql61608@uga.edu
+LastEditTime: 2023-06-18 11:46:19
+Description: 
+'''
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -20,7 +27,7 @@ df = pd.read_csv("dataset/cyber_data/cyber_final.csv")
 print(df.columns)
 print(np.unique(df["Protocol"]))
 
-protocol = "SNMP"
+protocol = "ARP"
 feature = "Traffic"
 delta = False
 # delta = True
@@ -46,7 +53,7 @@ else:
     plt.plot(normal_df["_time"], normal_df[feature], color='green', label="normal")
     plt.plot(attack_df["_time"], attack_df[feature], color='red', label='attack')
 
-plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 50), fontsize=20)
+plt.xticks(np.arange(0, len(normal_df["_time"]) + len(attack_df[feature]), 800), fontsize=20)
 plt.yticks(fontsize=40)
 if delta:
     plt.ylabel(f"{feature}_delta", size = 40)
