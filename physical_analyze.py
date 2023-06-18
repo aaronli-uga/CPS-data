@@ -2,7 +2,7 @@
 Author: Qi7
 Date: 2023-04-04 19:53:35
 LastEditors: aaronli-uga ql61608@uga.edu
-LastEditTime: 2023-06-16 22:28:21
+LastEditTime: 2023-06-17 22:22:27
 Description: 
 '''
 #%%
@@ -19,6 +19,14 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.manifold import TSNE
 import xgboost as xgb
+
+from models import ANN
+from utils import model_train_detection, model_train_diagnosis
+from loader import RegularLoader
+import torch
+import torch.optim as optim
+from torch.utils.data import DataLoader
+
 
 df = pd.read_csv("dataset/physical_data/physical_final.csv")
 
@@ -51,9 +59,11 @@ normalized_df = (df_tmp - df_tmp.mean()) / df_tmp.std()
 #         color=label_color,
 #         title="red: attack, green: normal" )
 # plt.show()
-# %%
 features = normalized_df.to_numpy()
-targets =  df_clean['class_2'].to_numpy()
+targets =  df_clean['class_1'].to_numpy()
+targets = np.expand_dims(targets, axis=1)
+
+
 
 # split the training and test data
 train_features, test_features, train_targets, test_targets = train_test_split(
@@ -66,26 +76,26 @@ train_features, test_features, train_targets, test_targets = train_test_split(
         random_state=23,
         # keep same proportion of 'target' in test and target data
         stratify=targets
-    )
+)
 
-# use LogisticRegression
-classifier = KNeighborsClassifier()
-# classifier = DecisionTreeClassifier()
-# classifier = RandomForestClassifier()
-# classifier =xgb.XGBClassifier()
+# %% machine learning methods
+# # classifier = KNeighborsClassifier()
+# # classifier = DecisionTreeClassifier()
+# # classifier = RandomForestClassifier()
+# # classifier =xgb.XGBClassifier()
 
-# training using 'training data'
-classifier.fit(train_features, train_targets) # fit the model for training data
+# # training using 'training data'
+# classifier.fit(train_features, train_targets) # fit the model for training data
 
-# predict the 'target' for 'training data'
-prediction_training_targets = classifier.predict(train_features)
-self_accuracy = accuracy_score(train_targets, prediction_training_targets)
-print("Accuracy for training data (self accuracy):", self_accuracy)
+# # predict the 'target' for 'training data'
+# prediction_training_targets = classifier.predict(train_features)
+# self_accuracy = accuracy_score(train_targets, prediction_training_targets)
+# print("Accuracy for training data (self accuracy):", self_accuracy)
 
-# predict the 'target' for 'test data'
-prediction_test_targets = classifier.predict(test_features)
-test_accuracy = accuracy_score(test_targets, prediction_test_targets)
-print("Accuracy for test data:", test_accuracy)
+# # predict the 'target' for 'test data'
+# prediction_test_targets = classifier.predict(test_features)
+# test_accuracy = accuracy_score(test_targets, prediction_test_targets)
+# print("Accuracy for test data:", test_accuracy)
 # %%
 # n_components = 2
 # tsne = TSNE(n_components)
@@ -98,4 +108,39 @@ print("Accuracy for test data:", test_accuracy)
 #         title="red: attack, green: normal" )
 # plt.legend(labels=label_color)
 # plt.show()
-# %%
+
+
+# %% ANN models
+
+
+save_model_path = "saved_models/"
+trainset = RegularLoader(train_features, train_targets)
+validset = RegularLoader(test_features, test_targets)
+
+# Hyper parameters
+batch_size = 512
+learning_rate = 0.01
+num_epochs = 500
+history = dict(val_loss=[], val_acc=[], val_f1=[], val_f1_all=[], train_loss=[], train_acc=[], train_f1=[], train_f1_all=[])
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+# device = "cpu"
+
+trainloader = DataLoader(trainset, shuffle=True, batch_size=batch_size)
+validloader = DataLoader(validset, shuffle=True, batch_size=batch_size) # get all the samples at once
+model = ANN(n_input=features.shape[1], n_classes=1)
+model.to(device)
+optimizer = optim.Adam(model.parameters(), lr=learning_rate)
+
+model_train_detection(
+    model=model, 
+    train_loader=trainloader, 
+    val_loader=validloader,
+    num_epochs=num_epochs,
+    optimizer=optimizer,
+    device=device,
+    history=history
+)
+
+torch.save(model.state_dict(), save_model_path + f"detection_epochs{num_epochs}_lr_{learning_rate}_bs_{batch_size}_best_model.pth")
+np.save(save_model_path + f"detection_epochs{num_epochs}_lr_{learning_rate}_bs_{batch_size}_history.npy", history)
